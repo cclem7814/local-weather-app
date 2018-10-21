@@ -1,28 +1,33 @@
-import { Component, OnInit } from '@angular/core';
-import { ICurrentWeather} from '../interfaces';
+import { AfterViewChecked, Component, OnInit } from '@angular/core';
+import { ICurrentWeather } from '../interfaces';
+import { WeatherService } from '../weather/weather.service';
 
 @Component({
   selector: 'app-current-weather',
  templateUrl: './current-weather.component.html',
- //template: `<p> current WeAtHeR WorKS`,
   styleUrls: ['./current-weather.component.css']
 })
-export class CurrentWeatherComponent implements OnInit {
-  current: ICurrentWeather;
 
-  constructor() { 
-    this.current = {
-      city: 'Amarillo',
-      country: 'USA',
-      date: new Date(),
-      image: 'assets/img/test.jpg',
-      temperature: 81,
-      description: 'Raining Outside',
-      } as ICurrentWeather;
+// export class CurrentWeatherComponent implements OnInit, AfterViewChecked {
+export class CurrentWeatherComponent implements OnInit  {
+    current: ICurrentWeather;
 
+  constructor(private weatherService: WeatherService) { }
+
+  getOrdinal(date: number) {
+    const n = new Date(date).getDate();
+    return n > 0
+      ? ['th', 'st', 'nd', 'rd'][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10]
+      : '';
+  }
+  ngOnInit() {
+    this.weatherService.currentWeather
+      .subscribe((data) => this.current = data);
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
+    this.weatherService.getCurrentWeather('AMARILLO', 'US')
+    .subscribe(data => this.weatherService.currentWeather.next(data));
   }
 
 }
